@@ -1,0 +1,18 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    padding: 10px;
+    background: lightskyblue;
+    outline: none !important;
+    margin-right: 15px;
+    border-radius: 8px;
+    border: 1px solid darkgrey;
+    cursor: pointer;
+  }
+}
