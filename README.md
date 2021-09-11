@@ -1,70 +1,119 @@
-# Getting Started with Create React App
+# redux
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Создание store (создаем папочку store и в ней index.js)
 
-## Available Scripts
+index.js :
 
-In the project directory, you can run:
+- подключаем Provider из react-redux
+- создаем store (store/index.js)
+- оборачиваем App в Provider и задаем store
 
-### `npm start`
+```javascript
+import { Provider } from 'react-redux'
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+import { store } from './store'
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root'),
+)
+```
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+store :
 
-### `npm run build`
+- combineReducers - если есть несколько редьюсеров то их нужно объеденить
+- rootReducer - создаем рут редьюсер
+- store - createStore(rootReducer, composeWithDevTools()) создание стора
+- composeWithDevTools - подключает devtools хрома
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```javascript
+import { createStore, combineReducers } from 'redux'
+import { cashReducer } from './cashReducer'
+import { customerReducer } from './customerReducer'
+import { composeWithDevTools } from 'redux-devtools-extension'
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+const rootReducer = combineReducers({
+  cash: cashReducer,
+  customers: customerReducer,
+})
+// const rootReducer = combineReducers({
+//   cashReducer,  тогда название редьюсера и обращение к нему будут одинаковы
+//   customerReducer,
+// })
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export const store = createStore(rootReducer, composeWithDevTools())
+```
 
-### `npm run eject`
+customerReducer :
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```javascript
+const defaultState = {
+  customers: [],
+}
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+const ADD_CASTOMER = 'ADD_CASTOMER'
+const REMOVE_CASTOMER = 'REMOVE_CASTOMER'
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+export const customerReducer = (state = defaultState, action) => {
+  switch (action.type) {
+    case ADD_CASTOMER:
+      return { ...state, customers: [...state.customers, action.payload] }
+    case REMOVE_CASTOMER:
+      return {
+        ...state,
+        customers: state.customers.filter(customer => customer.id !== action.payload),
+      }
+    default:
+      return state
+  }
+}
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+cashReducer :
 
-## Learn More
+```javascript
+const defaultState = {
+  cash: 0,
+}
+export const cashReducer = (state = defaultState, action) => {
+  switch (action.type) {
+    case 'ADD_CASH':
+      return { ...state, cash: state.cash + action.payload }
+    case 'GET_CASH':
+      return { ...state, cash: state.cash - action.payload }
+    default:
+      return state
+  }
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+работа с редьюсеров
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```javascript
+const dispatch = useDispatch()
+const cash = useSelector(state => state.cash.cash)
+const customers = useSelector(state => state.customers.customers)
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+const addCash = cash => {
+  dispatch({ type: 'ADD_CASH', payload: cash })
+}
+const getCash = cash => {
+  dispatch({ type: 'GET_CASH', payload: cash })
+}
+const addCustomer = name => {
+  const customer = {
+    name,
+    id: Date.now(),
+  }
+  //dispatch({ type: 'ADD_CASTOMER', payload: customer })
+  dispatch(addCustomerAction(customer))
+}
+const removeCustomer = customer => {
+  // dispatch({ type: 'REMOVE_CASTOMER', payload: customer.id })
+  dispatch(removeCustomerAction(customer.id))
+}
+```
