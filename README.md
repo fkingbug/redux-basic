@@ -1,5 +1,8 @@
 # redux
 
+npm i redux react-redux
+npm i redux-devtools-extension - девтулзы
+npm i redux-thunk - мидВееер для асинхронных запросов
 Создание store (создаем папочку store и в ней index.js)
 
 index.js :
@@ -116,4 +119,50 @@ const removeCustomer = customer => {
   // dispatch({ type: 'REMOVE_CASTOMER', payload: customer.id })
   dispatch(removeCustomerAction(customer.id))
 }
+```
+
+action creator - функция которая принимает в себя значения и возвращает объект action(a)
+action - обычный js объект с типом
+
+```javascript
+export const addCustomerAction = payload => ({ type: ADD_CASTOMER, payload })
+export const removeCustomerAction = payload => ({ type: REMOVE_CASTOMER, payload })
+
+//В app - диспатч выглядит так , вызываем функцию с нужным type и передаем payload
+const removeCustomer = customer => {
+  // dispatch({ type: 'REMOVE_CASTOMER', payload: customer.id })
+  dispatch(removeCustomerAction(customer.id))
+}
+```
+
+в сторе добавляем applyMiddleware(thunk) для асинхронного редакса (applyMiddleware - мидл вейер)
+
+```javascript
+export const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(thunk)))
+```
+
+asyncActions - папка для асинхронного action
+Возвращаем функцию (для того чтобы мы могли использовать ее как диспатч ) , которая принимает dispatch
+Вызываем диспатч( с нужным редьюсером и передаем туда json)
+
+```javascript
+import { addManyCustomersAction } from '../store/customerReducer'
+
+export const fetchCustomers = () => {
+  return function (dispatch) {
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then(response => response.json())
+      .then(json => dispatch(addManyCustomersAction(json)))
+  }
+}
+```
+
+customerReducer.js
+
+```javascript
+    case ADD_MANY_CUSTOMER:
+      return { ...state, customers: [...state.customers, ...action.payload] }
+//Берем стейт , изменяем customers [Старое значение массива , дополнительный payload]
+
+export const addManyCustomersAction = payload => ({ type: ADD_MANY_CUSTOMER, payload })
 ```
